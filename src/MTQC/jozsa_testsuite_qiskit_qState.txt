@@ -1,0 +1,45 @@
+def init ():
+	cr = ClassicalRegister(4)
+	qr = QuantumRegister(5)
+	qc = QuantumCircuit(qr, cr)
+
+	def uf (qc, qr):
+    		qc.cx(qr[0], qr[-1])
+
+	deutschjozsa(qc, qr, cr, uf)
+
+	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+
+	# Add any operations if needed
+	return pow(abs(ex.result().get_statevector()), 2)
+***
+def init ():
+	cr = ClassicalRegister(4)
+	qr = QuantumRegister(5)
+	qc = QuantumCircuit(qr, cr)
+
+	def uf (qc, qr):
+    		qc.iden(qr[-1])
+
+	deutschjozsa(qc, qr, cr, uf)
+
+	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+
+	# Add any operations if needed
+	return pow(abs(ex.result().get_statevector()), 2)
+***
+def init ():
+	cr = ClassicalRegister(4)
+	qr = QuantumRegister(5)
+	qc = QuantumCircuit(qr, cr)
+
+	def uf (qc, qr):
+    		qc.x(qr[-1])
+
+	deutschjozsa(qc, qr, cr, uf)
+
+	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+
+	# Add any operations if needed
+	return pow(abs(ex.result().get_statevector()), 2)
+***

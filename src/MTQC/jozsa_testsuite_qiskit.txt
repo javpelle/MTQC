@@ -1,0 +1,54 @@
+def init ():
+	cr = ClassicalRegister(4)
+	qr = QuantumRegister(5)
+	qc = QuantumCircuit(qr, cr)
+
+	def uf (qc, qr):
+    		qc.cx(qr[0], qr[-1])
+
+	deutschjozsa(qc, qr, cr, uf)
+
+	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+
+	# Add any operations if needed
+	if next(iter(ex.result().get_counts())) == '0000':
+		return 'constante'
+	else:
+		return 'balanceada'
+***
+def init ():
+	cr = ClassicalRegister(4)
+	qr = QuantumRegister(5)
+	qc = QuantumCircuit(qr, cr)
+
+	def uf (qc, qr):
+    		qc.iden(qr[-1])
+
+	deutschjozsa(qc, qr, cr, uf)
+
+	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+
+	# Add any operations if needed
+	if next(iter(ex.result().get_counts())) == '0000':
+		return 'constante'
+	else:
+		return 'balanceada'
+***
+def init ():
+	cr = ClassicalRegister(4)
+	qr = QuantumRegister(5)
+	qc = QuantumCircuit(qr, cr)
+
+	def uf (qc, qr):
+    		qc.x(qr[-1])
+
+	deutschjozsa(qc, qr, cr, uf)
+
+	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+
+	# Add any operations if needed
+	if next(iter(ex.result().get_counts())) == '0000':
+		return 'constante'
+	else:
+		return 'balanceada'
+***

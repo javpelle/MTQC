@@ -1,0 +1,60 @@
+operation MainQuantum() : String {
+	//Select desired Qubit number to be used
+	using (register = Qubit[5]) {
+            
+            
+		//Call method
+		let s = DeutschJozsa(register, uf);
+
+		
+		//Reset all qubits to Zero state
+		ResetAll(register);
+		return s;	
+	    }
+    }
+
+operation uf(register : Qubit[]) : Unit{
+	//f(x_1,x_2,x_3,x_4) = 1 si x_1 vale 1, 0 en otro caso. Balanceada
+        CNOT(register[0], register[Length(register) - 1]);
+    }
+***
+operation MainQuantum() : String{
+	//Select desired Qubit number to be used
+	using (register = Qubit[5]) {
+            
+            
+		//Call method
+		let s = DeutschJozsa(register, uf2);
+
+		
+		//Reset all qubits to Zero state
+		ResetAll(register);
+		return s;
+	    }
+    }
+
+operation uf2(register : Qubit[]) : Unit{
+	//f(x_1,x_2,x_3,x_4) = 1. Constante
+        I(register[Length(register) - 1]);
+    }
+***
+operation MainQuantum() : String{
+	//Select desired Qubit number to be used
+	using (register = Qubit[5]) {
+            
+            
+		//Call method
+		let s = DeutschJozsa(register, uf3);
+
+		
+		//Reset all qubits to Zero state
+		ResetAll(register);	
+		return s;
+	    }
+    }
+
+operation uf3(register : Qubit[]) : Unit {
+	//f(x_1,x_2,x_3,x_4) = 0. Constante
+	X(register[Length(register) - 1]);    
+   }
+***
