@@ -1,39 +1,15 @@
-## Welcome to GitHub Pages
+## Welcome to MTQC Docs
 
-You can use the [editor on GitHub](https://github.com/javpelle/MTQC/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+### Quickstart
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Download [zip file](https://github.com/javpelle/MTQC/releases/download/v0.1/MTQC-v0.1.zip) on your computer and extract it. 
+On MTQC folder run **MTQC-v0.1.jar** file.
 
-### Markdown
+MTQC needs Python for run quantum mutation testing. We recommend you to install Python with [Anaconda distribution](https://www.anaconda.com/). If you don't have Python installed, you can't do quantum testing but you can generate mutants.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-Cambio
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+MTQC supports [**Qiskit**](https://qiskit.org/) and [**Q#**](https://qsharp.community/) quantum languages. To test on Qiskit you must [install](https://qiskit.org/documentation/install.html) it:
+```bash
+pip install qiskit
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/javpelle/MTQC/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+To test on Q# check this [docs](https://docs.microsoft.com/en-us/quantum/quickstarts/).
