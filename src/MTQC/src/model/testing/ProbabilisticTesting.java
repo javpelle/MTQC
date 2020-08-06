@@ -55,4 +55,14 @@ public class ProbabilisticTesting extends Testing {
 		return new ProbabilistTestResult(mutantName, idTest);
 	}
 
+	@Override
+	public String getQiskitSimulator(int shots) {
+		return "ex = execute(qc, backend = Aer.get_backend('qasm_simulator'), shots = " + Integer.toString(shots) +")";
+	}
+
+	@Override
+	public String getQiskitCounts() {
+		return "return ex.result().get_counts()";
+	}
+
 }

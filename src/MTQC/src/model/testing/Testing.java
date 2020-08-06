@@ -62,5 +62,19 @@ public abstract class Testing {
 	 * @return A new TestResult objet.
 	 */
 	public abstract TestResult newTestResult(String mutantName, int idTest);
+	
+	/**
+	 * Return execute Qiskit method with default backend.
+	 * 
+	 * @param shots 
+	 * @return
+	 */
+	public abstract String getQiskitSimulator(int shots);
+	
+	/**
+	 * Return Qiskit counts from execute.
+	 * @return
+	 */
+	public abstract String getQiskitCounts();
 
 }

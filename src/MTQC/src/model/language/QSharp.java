@@ -170,7 +170,7 @@ public class QSharp extends Language {
 	}
 
 	@Override
-	public String getInputExample() {
+	public String getInputExample(Testing testing, int shots, String methodName) {
 		return qSharpText;
 	}
 

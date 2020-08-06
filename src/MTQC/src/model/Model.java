@@ -118,7 +118,8 @@ public class Model implements Observable<Observer> {
 	 * Notifies the observer that the language has changed.
 	 */
 	public void notifyLanguageChange() {
-		observer.updateMutantOperators(selectedLanguage.getMutantOperators(), selectedLanguage.getInputExample());
+		observer.updateMutantOperators(selectedLanguage.getMutantOperators());
+		observer.updateInputExample(selectedLanguage.getInputExample(null, 0, null));
 	}
 
 	@Override
@@ -446,6 +447,10 @@ public class Model implements Observable<Observer> {
 		}
 
 		observer.updateKills(kills);
+	}
+
+	public void updateTesting(Testing testing, int shots, String methodName) {
+		observer.updateInputExample(selectedLanguage.getInputExample(testing, shots, methodName));		
 	}
 
 }

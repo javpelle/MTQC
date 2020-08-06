@@ -19,6 +19,8 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -50,12 +52,12 @@ public class RunOptions extends JPanel {
 	 * 
 	 * @param listenerCombo Listener for the selected file field.
 	 */
-	public RunOptions(FileComboListener listenerCombo) {
+	public RunOptions(FileComboListener fileComboListener) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		fileCombo(listenerCombo);
-		methodCombo();
+		fileCombo(fileComboListener);
+		methodCombo(fileComboListener);
 		timeLimit();
-		testType();
+		testType(fileComboListener);
 	}
 
 	/**
@@ -76,6 +78,7 @@ public class RunOptions extends JPanel {
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
 				if (files.getSelectedItem() != null) {
 					listener.refreshMethods((String) files.getSelectedItem());
+					listener.updateTesting(getTestType(), getShots(), getMethodName());
 				}
 			}
 
@@ -91,11 +94,24 @@ public class RunOptions extends JPanel {
 	/**
 	 * Generates the method field.
 	 */
-	private void methodCombo() {
+	private void methodCombo(FileComboListener listener) {
 		JPanel aux = new JPanel();
 		aux.setLayout(new GridLayout(1, 2));
 		aux.add(new TextField("Method:"));
 		methods = new JComboBox<String>();
+		methods.addPopupMenuListener(new PopupMenuListener() {
+
+			public void popupMenuCanceled(PopupMenuEvent arg0) {
+			}
+
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
+				listener.updateTesting(getTestType(), getShots(), getMethodName());
+			}
+
+			public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {
+				
+			}
+		});
 		aux.add(methods);
 		add(aux);
 	}
@@ -115,7 +131,7 @@ public class RunOptions extends JPanel {
 	/**
 	 * Generates the TestType field.
 	 */
-	public void testType() {
+	public void testType(FileComboListener listener) {
 		JPanel aux1 = new JPanel();
 		aux1.setLayout(new GridLayout(1, 2));
 		aux1.add(new TextField("Testing Type:"));
@@ -126,6 +142,15 @@ public class RunOptions extends JPanel {
 		aux2.add(new TextField("Shots:"));
 		shots = new JSpinner(new SpinnerNumberModel(10, 1, 10000, 1));
 		shots.setEnabled(false);
+		shots.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				listener.updateTesting(getTestType(), getShots(), getMethodName());
+			}
+		
+		
+		});
 		aux2.add(shots);
 		testType.addPopupMenuListener(new PopupMenuListener() {
 
@@ -138,6 +163,7 @@ public class RunOptions extends JPanel {
 				} else {
 					shots.setEnabled(true);
 				}
+				listener.updateTesting(getTestType(), getShots(), getMethodName());
 			}
 
 			public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {
@@ -183,6 +209,8 @@ public class RunOptions extends JPanel {
 		public void refreshPath();
 
 		public void refreshMethods(String fileName);
+		
+		public void updateTesting(Testing testing, int shots, String methodName);
 	}
 
 	/**

@@ -74,7 +74,7 @@ public abstract class Language {
 		generatePythonScript(files, test, timeLimit);
 		listener.notify("Files generated. Running...\n");
 		ret = runMain(files, test);
-		deleteFiles(files);
+		//deleteFiles(files);
 		return ret;
 	}
 
@@ -113,7 +113,7 @@ public abstract class Language {
 	 * @param test  Type of test.
 	 * @return Results obtained from execution.
 	 */
-	private ArrayList<ArrayList<TestResult>> runMain(ArrayList<ArrayList<TestFile>> files, Testing test) {
+	protected ArrayList<ArrayList<TestResult>> runMain(ArrayList<ArrayList<TestFile>> files, Testing test) {
 		try {
 			Process p = Runtime.getRuntime().exec(pythonCall(path, main));
 			BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -346,7 +346,7 @@ public abstract class Language {
 	 * 
 	 * @return Input example String.
 	 */
-	public abstract String getInputExample();
+	public abstract String getInputExample(Testing testing, int shots, String methodName);
 
 	/**
 	 * @return language name String.

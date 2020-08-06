@@ -32,10 +32,9 @@ public interface Observer {
 	/**
 	 * Notifies mutant operator list of language.
 	 * 
-	 * @param qiskit
 	 * @param qiskitOperators Mutant operator list
 	 */
-	public void updateMutantOperators(MutantOperator[] mutantOperatorList, String example);
+	public void updateMutantOperators(MutantOperator[] mutantOperatorList);
 
 	/**
 	 * Updates the files in the new path
@@ -95,5 +94,11 @@ public interface Observer {
 	 * @param kills Indicates which mutants die.
 	 */
 	public void updateKills(ArrayList<ArrayList<Boolean>> kills);
+	
+	/**
+	 * Update input example in TestCaseRunner view.
+	 * @param inputExample
+	 */
+	public void updateInputExample(String inputExample);
 
 }

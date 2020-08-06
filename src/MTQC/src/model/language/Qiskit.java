@@ -10,7 +10,12 @@
 
 package model.language;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 import model.files.TestFile;
 import model.mutantoperator.MutantOperator;
 import model.mutantoperator.qiskit.CCXCSWAPGate;
@@ -66,19 +71,22 @@ import model.mutantoperator.qiskit.ZTGate;
 import model.mutantoperator.qiskit.ZXGate;
 import model.mutantoperator.qiskit.ZYGate;
 import model.testing.Testing;
+import model.testresult.TestResult;
+
 /**
- * Language concrete class, which overrides some methods in order to implement 
+ * Language concrete class, which overrides some methods in order to implement
  * the well behavior for Qiskit language.
+ * 
  * @author Javier & Luis
  *
  */
 public class Qiskit extends Language {
-	
+
 	/**
 	 * Name of the inicialization method.
 	 */
 	private static final String method = "init";
-	
+
 	/**
 	 * Initializes all possible mutant operators for Qiskit language.
 	 */
@@ -91,21 +99,19 @@ public class Qiskit extends Language {
 			new SZGate(), new TSdgGate(), new TSGate(), new TZGate(), new XHGate(), new XYGate(), new XZGate(),
 			new YHGate(), new YXGate(), new YZGate(), new ZHGate(), new ZSdgGate(), new ZSGate(), new ZTGate(),
 			new ZXGate(), new ZYGate() };
-	
+
 	/**
 	 * Example test for Qiskit.
 	 */
-	private static final String qiskitText = "def init ():" + System.lineSeparator() + "\tcr = ClassicalRegister(1)"
+	private static final String qiskitInitText = "def init ():" + System.lineSeparator() + "\tcr = ClassicalRegister(1)"
 			+ System.lineSeparator() + "\tqr = QuantumRegister(1)" + System.lineSeparator()
 			+ "\tqc = QuantumCircuit(qr, cr)" + System.lineSeparator() + "" + System.lineSeparator()
 			+ "\t# Initialize with desired quantum gates or QuantumCircuit.initialize() method" + System.lineSeparator()
-			+ "" + System.lineSeparator() + "\t# Call your method" + System.lineSeparator() + ""
-			+ System.lineSeparator() + "\tex = execute(qc, backend = Aer.get_backend('statevector_simulator'))"
-			+ System.lineSeparator() + "" + System.lineSeparator() + "\t# Add any operations if needed"
-			+ System.lineSeparator() + "\t" + System.lineSeparator()
-			+ "\treturn next(iter(ex.result().get_counts())) # Change desired return" + System.lineSeparator()
-			+ "\t#return pow(abs(ex.result().get_statevector()), 2) # If probabilistic test chosen";
-	
+			+ "" + System.lineSeparator();
+
+	private static final String qiskitEndText = "\t# Add any operations if needed" + System.lineSeparator() + "\t"
+			+ System.lineSeparator();
+
 	@Override
 	protected TestFile generateFile(String completePath, String fileName, String test, int id_test, String methodName,
 			String mutantName) {
@@ -121,6 +127,61 @@ public class Qiskit extends Language {
 	@Override
 	protected String generateImportLanguage() {
 		return "from qiskit import *" + System.lineSeparator();
+	}
+	
+	@Override
+	protected void generatePythonScript(ArrayList<ArrayList<TestFile>> files, Testing test, double timeLimit) {
+		String script = generateImportLanguage();
+		script += System.lineSeparator();
+		script += "from tools import run_qiskit_shots, save_data" + System.lineSeparator();
+		for (ArrayList<TestFile> list : files) {
+			for (TestFile t : list) {
+				script += "import " + t.getFileName() + System.lineSeparator();
+			}
+		}
+		script += System.lineSeparator();
+		script += "if __name__ == '__main__':" + System.lineSeparator();
+		script += "\td = {}" + System.lineSeparator();
+		for (ArrayList<TestFile> list : files) {
+			for (TestFile t : list) {
+				script += "\trun_qiskit_shots(" + getMethodCall(t.getFileName()) + ", " + String.valueOf(timeLimit) + ", "
+						+ String.valueOf(test.getShots()) + ", " + "d)" + System.lineSeparator();
+			}
+		}
+		script += "\tsave_data(d)" + System.lineSeparator();
+		writeFile(path + File.separator + main, script);
+	}
+	
+	@Override
+	protected ArrayList<ArrayList<TestResult>> runMain(ArrayList<ArrayList<TestFile>> files, Testing test) {
+		try {
+			Process p = Runtime.getRuntime().exec(pythonCall(path, main));
+			p.waitFor();
+			return generateResults(files, test);
+		} catch (IOException e) {
+
+		} catch (InterruptedException e) {
+			
+		}
+		return null;
+	}
+
+	private ArrayList<ArrayList<TestResult>> generateResults(ArrayList<ArrayList<TestFile>> files, Testing test) {
+		ArrayList<ArrayList<TestResult>> results = new ArrayList<ArrayList<TestResult>>();
+		for (ArrayList<TestFile> list : files) {
+			ArrayList<TestResult> aux = new ArrayList<TestResult>();
+			for (int t = 0; t < list.size(); t++) {
+				TestResult tr = test.newTestResult(list.get(t).getMutantName(), list.get(t).getIdTest());
+				for (int i = 0; i < test.getShots(); i++) {
+					//tr.setResult(readLine(in));
+				}
+				tr.make();
+				aux.add(tr);
+			}
+			results.add(aux);
+			listener.notify("Test number " + (list.get(0).getIdTest() + 1) + " finished\n");
+		}
+		return results;
 	}
 
 	@Override
@@ -139,8 +200,22 @@ public class Qiskit extends Language {
 	}
 
 	@Override
-	public String getInputExample() {
-		return qiskitText;
+	public String getInputExample(Testing testing, int shots, String methodName) {
+		String input = qiskitInitText;
+		String end = "";
+		if (methodName != null) {
+			input += "\t" + methodName + System.lineSeparator() + System.lineSeparator();;
+		} else {
+			input += "\t# Call your method" + System.lineSeparator() + System.lineSeparator();
+		}
+		if (testing != null) {
+			input += "\t" + testing.getQiskitSimulator(shots) + System.lineSeparator();
+			end += "\t" + testing.getQiskitCounts() + System.lineSeparator();
+		} else {
+			input += "\tex = execute(qc, backend = Aer.get_backend('statevector_simulator'))" + System.lineSeparator();
+			end = "\treturn pow(abs(ex.result().get_statevector()), 2)";
+		}		
+		return input + qiskitEndText + end;
 	}
 
 	@Override
@@ -167,6 +242,5 @@ public class Qiskit extends Language {
 	public String getEndMethodToken() {
 		return ":";
 	}
-	
-	
+
 }

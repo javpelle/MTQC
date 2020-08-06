@@ -190,4 +190,8 @@ public class Controller {
 		return testSuite;
 	}
 
+	public void updateTesting(Testing testing, int shots, String methodName) {
+		model.updateTesting(testing, shots, methodName);		
+	}
+
 }

@@ -8,13 +8,9 @@ def init ():
 
 	deutschjozsa(qc, qr, cr, uf)
 
-	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+	ex = execute(qc, backend = Aer.get_backend('qasm_simulator'), shots = 10)
 
-	# Add any operations if needed
-	if next(iter(ex.result().get_counts())) == '0000':
-		return 'constante'
-	else:
-		return 'balanceada'
+	return ex.result().get_counts()
 ***
 def init ():
 	cr = ClassicalRegister(4)
@@ -26,13 +22,10 @@ def init ():
 
 	deutschjozsa(qc, qr, cr, uf)
 
-	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+	ex = execute(qc, backend = Aer.get_backend('qasm_simulator'), shots = 10)
 
 	# Add any operations if needed
-	if next(iter(ex.result().get_counts())) == '0000':
-		return 'constante'
-	else:
-		return 'balanceada'
+	return ex.result().get_counts()
 ***
 def init ():
 	cr = ClassicalRegister(4)
@@ -44,11 +37,8 @@ def init ():
 
 	deutschjozsa(qc, qr, cr, uf)
 
-	ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))
+	ex = execute(qc, backend = Aer.get_backend('qasm_simulator'), shots = 10)
 
 	# Add any operations if needed
-	if next(iter(ex.result().get_counts())) == '0000':
-		return 'constante'
-	else:
-		return 'balanceada'
+	return ex.result().get_counts()
 ***

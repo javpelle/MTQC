@@ -61,9 +61,9 @@ public class UI extends JFrame implements Observer {
 	/**
 	 * Constructor of view
 	 * 
-	 * @param c a Controller
-	 * @param o an Observable for add this view as observer.
-	 * @param languages 
+	 * @param c         a Controller
+	 * @param o         an Observable for add this view as observer.
+	 * @param languages
 	 */
 	public UI(Controller c, Observable<Observer> o) {
 		super("Mutation Testing for Quantum Computing");
@@ -129,12 +129,17 @@ public class UI extends JFrame implements Observer {
 				c.getFileMethods(fileName);
 
 			}
+			
+			@Override
+			public void updateTesting(Testing testing, int shots, String methodName) {
+				c.updateTesting(testing, shots, methodName);
+			}
 
 		}, new RunListener() {
 
 			@Override
-			public void runTests(ArrayList<Mutant> selectedMutants, String fileName, String methodName, Testing testType,
-					int shots, ArrayList<String> testFileName, double timeLimit) {
+			public void runTests(ArrayList<Mutant> selectedMutants, String fileName, String methodName,
+					Testing testType, int shots, ArrayList<String> testFileName, double timeLimit) {
 				tabbedPane.startedRun(true);
 				c.runTests(selectedMutants, fileName, methodName, testType, shots, testFileName, timeLimit);
 				tabbedPane.startedRun(false);
@@ -160,8 +165,8 @@ public class UI extends JFrame implements Observer {
 	}
 
 	@Override
-	public void updateMutantOperators(MutantOperator[] mutantOperatorList, String example) {
-		tabbedPane.updateOperators(mutantOperatorList, example);
+	public void updateMutantOperators(MutantOperator[] mutantOperatorList) {
+		tabbedPane.updateOperators(mutantOperatorList);
 	}
 
 	@Override
@@ -202,6 +207,11 @@ public class UI extends JFrame implements Observer {
 	@Override
 	public void updateKills(ArrayList<ArrayList<Boolean>> kills) {
 		tabbedPane.updateKills(kills);
+	}
+
+	@Override
+	public void updateInputExample(String inputExample) {
+		tabbedPane.updateInputText(inputExample);
 	}
 
 }

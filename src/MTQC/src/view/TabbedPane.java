@@ -69,7 +69,7 @@ public class TabbedPane extends JTabbedPane {
 	 * @param listenerRun        Listener for run button on TestCase.
 	 * @param listenerConfidence Listener for confidence parameter.
 	 */
-	public TabbedPane(NewPathListener listener, NewGenerateListener listenGenerate, FileComboListener listenerComboFile,
+	public TabbedPane(NewPathListener listener, NewGenerateListener listenGenerate, FileComboListener fileComboListener,
 			RunListener listenerRun, ConfidenceListener listenerConfidence) {
 		mutantsgenerator = new MutantsGenerator(listener, listenGenerate);
 		addTab("Mutants Generator", mutantsgenerator);
@@ -77,7 +77,7 @@ public class TabbedPane extends JTabbedPane {
 		mutantsViewer = new MutantsViewer();
 		addTab("Mutants Viewer", mutantsViewer);
 
-		testCaseRunner = new TestCaseRunner(listenerComboFile, listenerRun);
+		testCaseRunner = new TestCaseRunner(fileComboListener, listenerRun);
 		addTab("TestCase Runner", testCaseRunner);
 
 		testResults = new TestResultsView(listenerConfidence);
@@ -101,9 +101,8 @@ public class TabbedPane extends JTabbedPane {
 	 * @param mutantOperatorList List of new operators.
 	 * @param qiskit             To check if qiskit language is selected.
 	 */
-	public void updateOperators(MutantOperator[] mutantOperatorList, String example) {
+	public void updateOperators(MutantOperator[] mutantOperatorList) {
 		mutantsgenerator.updateOperators(mutantOperatorList);
-		testCaseRunner.updateLanguage(example);
 	}
 
 	/**
@@ -171,14 +170,18 @@ public class TabbedPane extends JTabbedPane {
 	public void updateKills(ArrayList<ArrayList<Boolean>> kills) {
 		testResults.updateKills(kills);
 	}
-	
+
 	/**
-	 * Notify when run process starts and finishes.
-	 * Lock and unlock run button.
+	 * Notify when run process starts and finishes. Lock and unlock run button.
+	 * 
 	 * @param started true if starts, false if finishes.
 	 */
 	public void startedRun(boolean started) {
 		testCaseRunner.startedRun(started);
+	}
+
+	public void updateInputText(String inputExample) {
+		testCaseRunner.updateLanguage(inputExample);
 	}
 
 }

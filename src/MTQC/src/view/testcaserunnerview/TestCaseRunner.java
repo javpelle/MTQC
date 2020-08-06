@@ -50,7 +50,7 @@ public class TestCaseRunner extends JPanel {
 	 * @param listenerCombo Listener for the selected file field.
 	 * @param listenerRun Listener for the run button.
 	 */
-	public TestCaseRunner(FileComboListener listenerCombo, RunListener listenerRun) {
+	public TestCaseRunner(FileComboListener fileComboListener, RunListener listenerRun) {
 		setLayout(new BorderLayout());
 
 		mutantsView = new MutantsView();
@@ -64,7 +64,7 @@ public class TestCaseRunner extends JPanel {
 		west.add(westAux);
 		add(west, BorderLayout.WEST);
 
-		runOptions = new RunOptions(listenerCombo);
+		runOptions = new RunOptions(fileComboListener);
 		inputTest = new InputTest();
 
 		JPanel center = new JPanel();

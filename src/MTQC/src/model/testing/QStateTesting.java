@@ -47,4 +47,15 @@ public class QStateTesting extends Testing {
 		return new QStateTestResult(mutantName, idTest);
 	}
 
+	@Override
+	public String getQiskitSimulator(int shots) {
+		return "ex = execute(qc, backend = Aer.get_backend('statevector_simulator'))";
+	}
+
+	@Override
+	public String getQiskitCounts() {
+		
+		return "return pow(abs(ex.result().get_statevector()), 2)";
+	}
+
 }
