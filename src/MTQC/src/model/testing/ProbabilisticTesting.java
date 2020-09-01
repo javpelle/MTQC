@@ -52,7 +52,7 @@ public class ProbabilisticTesting extends Testing {
 
 	@Override
 	public TestResult newTestResult(String mutantName, int idTest) {
-		return new ProbabilistTestResult(mutantName, idTest);
+		return new ProbabilistTestResult(mutantName, idTest, shots);
 	}
 
 	@Override
@@ -63,6 +63,11 @@ public class ProbabilisticTesting extends Testing {
 	@Override
 	public String getQiskitCounts() {
 		return "return ex.result().get_counts()";
+	}
+
+	@Override
+	public ETestingType getTestingType() {
+		return ETestingType.PROBABILISTICTESTING;
 	}
 
 }

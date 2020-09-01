@@ -77,15 +77,9 @@ public class TestCaseRunner extends JPanel {
 		runTests = new JButton("Run Tests");
 		runTests.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Thread thread = new Thread(){
-				    public void run(){
-				    	listenerRun.runTests(mutantsView.getSelectedFiles(), runOptions.getFileName(),
-								runOptions.getMethodName(), runOptions.getTestType(), runOptions.getShots(),
-								inputTest.getTest(), runOptions.getTimeLimit());
-				    }
-				};
-				thread.start();
-				
+				listenerRun.runTests(mutantsView.getSelectedFiles(), runOptions.getFileName(),
+						runOptions.getMethodName(), runOptions.getTestType(), runOptions.getShots(),
+						inputTest.getTest(), runOptions.getTimeLimit());				
 			}
 		});
 		JPanel south = new JPanel();

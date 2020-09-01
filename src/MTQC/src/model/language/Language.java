@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import model.files.TestFile;
+import model.json.JSON;
 import model.mutant.Mutant;
 import model.mutantoperator.MutantOperator;
 import model.testing.Testing;
@@ -32,6 +33,13 @@ import model.testresult.TestResult;
  *
  */
 public abstract class Language {
+	
+	/**
+	 * Absolute path where Python is.
+	 * Windows: C:\Pythonxx\python.exe
+	 * Linux: python
+	 */
+	protected String pythonPath;
 
 	/**
 	 * Directory used for all related python stuff.
@@ -50,6 +58,11 @@ public abstract class Language {
 	 * Token used to distinguish between internal prints, and method return print.
 	 */
 	protected static final String keyEnd = "_mtqc_e";
+	
+	/**
+	 * File to store json results.
+	 */
+	private static final String data_json = "data.json";
 
 	/**
 	 * Notify progress to Model.
@@ -64,17 +77,19 @@ public abstract class Language {
 	 * @param test       Type of test to be used.
 	 * @param method     Name of method to be tested.
 	 * @param timeLimit  Limit of time each test can run.
+	 * @param pythonPath 
 	 * @return All test results gathered during execution.
 	 */
 	public ArrayList<ArrayList<TestResult>> run(ArrayList<Mutant> mutantList, ArrayList<String> testSuit, Testing test,
-			String method, double timeLimit, NotifyListener listener) {
+			String method, double timeLimit, NotifyListener listener, String pythonPath) {
+		this.pythonPath = pythonPath;
 		this.listener = listener;
 		ArrayList<ArrayList<TestResult>> ret;
 		ArrayList<ArrayList<TestFile>> files = generateFiles(mutantList, testSuit, method);
 		generatePythonScript(files, test, timeLimit);
 		listener.notify("Files generated. Running...\n");
 		ret = runMain(files, test);
-		//deleteFiles(files);
+		deleteFiles(files);
 		return ret;
 	}
 
@@ -90,6 +105,7 @@ public abstract class Language {
 			}
 		}
 		deleteFile(path + File.separator + main);
+		deleteFile(path + File.separator + data_json);
 	}
 
 	/**
@@ -116,25 +132,40 @@ public abstract class Language {
 	protected ArrayList<ArrayList<TestResult>> runMain(ArrayList<ArrayList<TestFile>> files, Testing test) {
 		try {
 			Process p = Runtime.getRuntime().exec(pythonCall(path, main));
-			BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			return generateResults(in, files, test);
-		} catch (IOException e) {
-
-		}
+			Thread thread = new Thread() {
+				public void run() {
+					BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					try {
+						String msg = in.readLine();
+						while (msg != null) {
+							listener.notify(msg);
+							msg = in.readLine();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			thread.start();
+			p.waitFor();
+			return generateResults(files, test);
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		} 
 		return null;
 	}
 
 	/**
-	 * Dinamically creates the main python script.
+	 * Dynamically creates the main python script.
 	 * 
-	 * @param files     All files needed to be exectued.
+	 * @param files     All files needed to be executed.
 	 * @param test      Type of test.
 	 * @param timeLimit Maximum time each file can run for.
 	 */
 	protected void generatePythonScript(ArrayList<ArrayList<TestFile>> files, Testing test, double timeLimit) {
 		String script = generateImportLanguage();
 		script += System.lineSeparator();
-		script += "from tools import run_shots" + System.lineSeparator();
+		script += "from tools import " + getRunMethod() + ", save_data" + System.lineSeparator();
 		for (ArrayList<TestFile> list : files) {
 			for (TestFile t : list) {
 				script += "import " + t.getFileName() + System.lineSeparator();
@@ -142,15 +173,17 @@ public abstract class Language {
 		}
 		script += System.lineSeparator();
 		script += "if __name__ == '__main__':" + System.lineSeparator();
+		script += "\td = {}" + System.lineSeparator();
 		for (ArrayList<TestFile> list : files) {
 			for (TestFile t : list) {
-				script += "\trun_shots(" + getMethodCall(t.getFileName()) + ", " + String.valueOf(timeLimit) + ", "
-						+ String.valueOf(test.getShots()) + isQStateTest(test) + ")" + System.lineSeparator();
+				script += "\t" + getRunMethod() + "(" + getMethodCall(t.getFileName()) + ", " + String.valueOf(timeLimit) + ", "
+						+ String.valueOf(test.getShots()) + ", d" + isQStateTest(test) +")" + System.lineSeparator();
 			}
 		}
+		script += "\tsave_data(d)" + System.lineSeparator();
 		writeFile(path + File.separator + main, script);
 	}
-
+	
 	/**
 	 * Checks if we are running a Probability Test on QSharp.
 	 * 
@@ -168,12 +201,12 @@ public abstract class Language {
 	protected abstract String generateImportLanguage();
 
 	/**
-	 * "Glues" each mutant with an inicialization (Test)
+	 * "Glues" each mutant with an initialization (Test)
 	 * 
 	 * @param mutantList List of mutants to be tested.
 	 * @param testSuit   Lists of tests.
 	 * @param method     Name of method to be tested.
-	 * @return A list of all posible combinations of Mutants and Tests.
+	 * @return A list of all possible combinations of Mutants and Tests.
 	 */
 	protected ArrayList<ArrayList<TestFile>> generateFiles(ArrayList<Mutant> mutantList, ArrayList<String> testSuit,
 			String method) {
@@ -193,7 +226,7 @@ public abstract class Language {
 	}
 
 	/**
-	 * Dinamically generets a file given a mutant and a test.
+	 * Dynamically generates a file given a mutant and a test.
 	 * 
 	 * @param completePath Complete path for the mutant.
 	 * @param fileName     Name of file which contains the mutant.
@@ -201,7 +234,7 @@ public abstract class Language {
 	 * @param id_test      Test identifier.
 	 * @param method       Name of method to be tested.
 	 * @param mutantName   Name of the mutant.
-	 * @return A TestFile which represents the "association" betweern a particular
+	 * @return A TestFile which represents the "association" between a particular
 	 *         mutant and a particular test.
 	 */
 	protected abstract TestFile generateFile(String completePath, String fileName, String test, int id_test,
@@ -246,9 +279,9 @@ public abstract class Language {
 			// QSharp python script must run from the same path as the methods
 			// it calls cuz
 			// ...?
-			return new String[] { "cmd.exe", "/c", "cd", path, "&&", "python", file, "&&", "cd", ".." };
+			return new String[] { "cmd.exe", "/c", "cd", path, "&&", pythonPath, file, "&&", "cd", ".." };
 		} else {
-			return new String[] { "/bin/bash", "-c", "cd", path, "&&", "python", file, "&&", "cd", ".." };
+			return new String[] { "/bin/bash", "-c", "cd", path, "&&", pythonPath, file, "&&", "cd", ".." };
 		}
 	}
 
@@ -281,26 +314,23 @@ public abstract class Language {
 	/**
 	 * Generates all the results from the execution.
 	 * 
-	 * @param in    Reader used to get the results from standard output.
 	 * @param files List of all TestFiles where we will save the results.
 	 * @param test  Type of test.
 	 * @return List of all TestFiles for this execution.
 	 */
-	protected ArrayList<ArrayList<TestResult>> generateResults(BufferedReader in, ArrayList<ArrayList<TestFile>> files,
+	protected ArrayList<ArrayList<TestResult>> generateResults(ArrayList<ArrayList<TestFile>> files,
 			Testing test) {
 		ArrayList<ArrayList<TestResult>> results = new ArrayList<ArrayList<TestResult>>();
+		JSON json = new JSON("python\\data.json");
+		int count = 0;
 		for (ArrayList<TestFile> list : files) {
 			ArrayList<TestResult> aux = new ArrayList<TestResult>();
 			for (int t = 0; t < list.size(); t++) {
 				TestResult tr = test.newTestResult(list.get(t).getMutantName(), list.get(t).getIdTest());
-				for (int i = 0; i < test.getShots(); i++) {
-					tr.setResult(readLine(in));
-				}
-				tr.make();
+				tr.setResult(json.getCounts(count++));
 				aux.add(tr);
 			}
 			results.add(aux);
-			listener.notify("Test number " + (list.get(0).getIdTest() + 1) + " finished\n");
 		}
 		return results;
 	}
@@ -381,4 +411,10 @@ public abstract class Language {
 	 * @return End method Token language String.
 	 */
 	public abstract String getEndMethodToken();
+	
+	/**
+	 * "run_qiskit_shots" or "run_qsharp_shots".
+	 * @return "run_qiskit_shots" or "run_qsharp_shots".
+	 */
+	protected abstract String getRunMethod();
 }

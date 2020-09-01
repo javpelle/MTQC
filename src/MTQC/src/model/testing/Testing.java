@@ -76,5 +76,11 @@ public abstract class Testing {
 	 * @return
 	 */
 	public abstract String getQiskitCounts();
+	
+	/**
+	 * Returns testing type.
+	 * @return ETestingType
+	 */
+	public abstract ETestingType getTestingType();
 
 }

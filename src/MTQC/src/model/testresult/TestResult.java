@@ -10,6 +10,8 @@
 
 package model.testresult;
 
+import java.util.HashMap;
+
 /**
  * This class represents the result obtained from running a test on a particular
  * mutant.
@@ -18,6 +20,12 @@ package model.testresult;
  *
  */
 public abstract class TestResult {
+	
+	/**
+	 * Represents the ocurrences of each result.
+	 */
+	protected HashMap<String, Long> map;
+	
 	/**
 	 * Name of the mutant the test was runned on.
 	 */
@@ -26,6 +34,11 @@ public abstract class TestResult {
 	 * Identifier for the test.
 	 */
 	protected int idTest;
+	
+	/**
+	 * Shots.
+	 */
+	protected int shots;
 
 	/**
 	 * Constructor for the class.
@@ -33,9 +46,10 @@ public abstract class TestResult {
 	 * @param mutantName Name of the mutant.
 	 * @param idTest     Identifier for test.
 	 */
-	public TestResult(String mutantName, int idTest) {
+	public TestResult(String mutantName, int idTest, int shots) {
 		this.mutantName = mutantName;
 		this.idTest = idTest;
+		this.shots = shots;
 	}
 
 	/**
@@ -44,18 +58,15 @@ public abstract class TestResult {
 	 * @return String used to identify this particular test result.
 	 */
 	public abstract String getName();
-
+	
 	/**
 	 * Saves the result obtained from running this test.
 	 * 
-	 * @param result String which represents the result of a test.
+	 * @param result String which represents the result map of a test.
 	 */
-	public abstract void setResult(String result);
-
-	/**
-	 * Used to group results if several iteration were applied.
-	 */
-	public abstract void make();
+	public void setResult(HashMap<String, Long> map) {
+		this.map = map;
+	}
 
 	/**
 	 * Checks if this mutant lives or dies.
@@ -71,5 +82,7 @@ public abstract class TestResult {
 	 * 
 	 * @return String or array of strings (in case multiple shots were applied).
 	 */
-	protected abstract Object getResult();
+	protected HashMap<String, Long> getResult() {
+		return map;
+	}
 }

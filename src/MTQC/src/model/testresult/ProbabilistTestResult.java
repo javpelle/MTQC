@@ -10,7 +10,6 @@
 
 package model.testresult;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -21,47 +20,20 @@ import java.util.HashMap;
  *
  */
 public class ProbabilistTestResult extends TestResult {
-	/**
-	 * A list of all the results obtained from each shot.
-	 */
-	private ArrayList<String> result;
-	/**
-	 * Represents the ocurrences of each result.
-	 */
-	private HashMap<String, Integer> map;
-
+	
 	/**
 	 * Constructor for the class.
 	 * 
 	 * @param mutantName Name of the mutant.
 	 * @param idTest     Identifier for test.
 	 */
-	public ProbabilistTestResult(String mutantName, int idTest) {
-		super(mutantName, idTest);
-		result = new ArrayList<String>();
+	public ProbabilistTestResult(String mutantName, int idTest, int shots) {
+		super(mutantName, idTest, shots);
 	}
 	
 	@Override
 	public String getName() {
 		return mutantName + "_" + Integer.toString(idTest);
-	}
-
-	@Override
-	public void setResult(String result) {
-		this.result.add(result);
-	}
-
-	@Override
-	public void make() {
-		HashMap<String, Integer> map = new HashMap<String, Integer>();
-		for (String r : result) {
-			if (map.containsKey(r)) {
-				map.put(r, map.get(r) + 1);
-			} else {
-				map.put(r, 1);
-			}
-		}
-		this.map = map;
 	}
 	
 	/**
@@ -69,20 +41,19 @@ public class ProbabilistTestResult extends TestResult {
 	 */
 	public String toString() {
 		String ret = "";
-		for (HashMap.Entry<String, Integer> entry : map.entrySet()) {
+		for (HashMap.Entry<String, Long> entry : map.entrySet()) {
 			ret += "(" + entry.getKey() + ", " + entry.getValue() + ", "
-					+ String.valueOf((double) Math.round(entry.getValue() * 1000.0 / result.size()) / 10.0) + "%)";
+					+ String.valueOf((double) Math.round(entry.getValue() * 1000.0 / shots) / 10.0) + "%)";
 		}
 		return ret;
 	}
 
 	@Override
 	public boolean getKill(TestResult original, double confidence) {
-		int max = 0;
-		@SuppressWarnings("unchecked")
-		HashMap<String, Integer> originalMap = (HashMap<String, Integer>) original.getResult();
+		long max = 0;
+		HashMap<String, Long> originalMap = original.getResult();
 
-		for (HashMap.Entry<String, Integer> entry : map.entrySet()) {
+		for (HashMap.Entry<String, Long> entry : map.entrySet()) {
 			if (!originalMap.containsKey(entry.getKey())) {
 				max = Math.max(max, entry.getValue());
 			} else {
@@ -90,19 +61,14 @@ public class ProbabilistTestResult extends TestResult {
 			}
 		}
 
-		for (HashMap.Entry<String, Integer> entry : originalMap.entrySet()) {
+		for (HashMap.Entry<String, Long> entry : originalMap.entrySet()) {
 			if (!map.containsKey(entry.getKey())) {
 				max = Math.max(max, entry.getValue());
 			}
 		}
-		double percentageByCount = 100.0 / result.size();
+		double percentageByCount = 100.0 / shots;
 		double confidenceCounts = confidence / percentageByCount;
 		return max > confidenceCounts;
-	}
-
-	@Override
-	protected Object getResult() {
-		return map;
 	}
 
 }

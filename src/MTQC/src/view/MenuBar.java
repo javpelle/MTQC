@@ -25,6 +25,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 
+import model.configuration.Option;
+import model.language.ELanguage;
+
 /**
  * Typical menu bar of the UI.
  * 
@@ -48,7 +51,7 @@ public class MenuBar extends JMenuBar {
 	 * @param listener      Listener for the language change field.
 	 * @param resetListener Listener for the reset button.
 	 */
-	public MenuBar(LanguageListener listener, ResetListener resetListener) {
+	public MenuBar(LanguageListener listener, ResetListener resetListener, OptionsListener optionListener) {
 		JMenu menu1 = new JMenu("File");
 		add(menu1);
 		JMenuItem reset = new JMenuItem("Reset");
@@ -77,39 +80,47 @@ public class MenuBar extends JMenuBar {
 		// If new Language is added, it is necessary replicate structure code.
 		qiskit.addItemListener((e) -> {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
-				listener.languageChosen(0);
+				listener.languageChosen(ELanguage.QISKIT);
 			}
 		});
 
 		qsharp.addItemListener((e) -> {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
-				listener.languageChosen(1);
+				listener.languageChosen(ELanguage.QSHARP);
 			}
 		});
 
 		add(menu2);
 
-		JMenu menu3 = new JMenu("Help");
+		JMenu menu3 = new JMenu("Options");
 		add(menu3);
+		JMenuItem pythonPath = new JMenuItem("Configure");
+		menu3.add(pythonPath);
+		pythonPath.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new OptionsFrame(optionListener.getOptions());				
+			}
+		});
+
+		JMenu menu4 = new JMenu("Help");
+		add(menu4);
 		JMenuItem help = new JMenuItem("Help Contents");
-		menu3.add(help);
+		menu4.add(help);
 		help.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					java.awt.Desktop.getDesktop().browse(new URI(URL_Readme));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (URISyntaxException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				} catch (IOException | URISyntaxException ex) {
+					ex.printStackTrace();
 				}
 			}
 		});
 
 		JMenuItem freeSW = new JMenuItem("Free Software Libraries");
-		menu3.add(freeSW);
+		menu4.add(freeSW);
 		freeSW.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -133,7 +144,7 @@ public class MenuBar extends JMenuBar {
 	 *
 	 */
 	public interface LanguageListener {
-		public void languageChosen(int language);
+		public void languageChosen(ELanguage qiskit);
 	}
 
 	/**
@@ -144,6 +155,10 @@ public class MenuBar extends JMenuBar {
 	 */
 	public interface ResetListener {
 		public void reset();
+	}
+	
+	public interface OptionsListener {
+		public Option[] getOptions();
 	}
 
 }

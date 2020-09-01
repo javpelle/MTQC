@@ -10,6 +10,8 @@
 
 package model.testresult;
 
+import java.util.HashMap;
+
 /**
  * Concrete TestResult which represents a type of test which checks the concrete
  * values of the quantum system.
@@ -18,7 +20,6 @@ package model.testresult;
  *
  */
 public class QStateTestResult extends TestResult {
-	private String result;
 
 	/**
 	 * Constructor for the class.
@@ -26,9 +27,8 @@ public class QStateTestResult extends TestResult {
 	 * @param mutantName Name of the mutant.
 	 * @param idTest     Identifier for test.
 	 */
-	public QStateTestResult(String mutantName, int idTest) {
-		super(mutantName, idTest);
-
+	public QStateTestResult(String mutantName, int idTest, int shots) {
+		super(mutantName, idTest, shots);
 	}
 
 	@Override
@@ -36,29 +36,26 @@ public class QStateTestResult extends TestResult {
 		return mutantName + "_" + Integer.toString(idTest);
 	}
 
-	@Override
-	public void setResult(String result) {
-		this.result = result;
-	}
-
-	@Override
-	public void make() {
-	}
-
 	/**
 	 * Overrides Object toString method.
 	 */
 	public String toString() {
-		return result;
+		String ret = "";
+		for (HashMap.Entry<String, Long> entry : map.entrySet()) {
+			if (entry.getValue() != 0) {
+				ret = " |" + entry.getKey() + "> = " + (double) entry.getValue() + "%," + ret;
+			}
+		}
+		return "[" + ret.substring(0, ret.length() - 1) + " ]";
 	}
+	
+//	private String toBase2(String integer) {
+//		return Integer.toBinaryString(Integer.valueOf(integer));	
+//	}
 
 	@Override
 	public boolean getKill(TestResult original, double confidence) {
-		return !result.equals((String) original.getResult());
+		return !map.equals(original.getResult());
 	}
 
-	@Override
-	protected Object getResult() {
-		return result;
-	}
 }

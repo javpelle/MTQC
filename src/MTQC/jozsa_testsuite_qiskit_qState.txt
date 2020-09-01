@@ -19,7 +19,7 @@ def init ():
 	qc = QuantumCircuit(qr, cr)
 
 	def uf (qc, qr):
-    		qc.iden(qr[-1])
+    		qc.i(qr[-1])
 
 	deutschjozsa(qc, qr, cr, uf)
 

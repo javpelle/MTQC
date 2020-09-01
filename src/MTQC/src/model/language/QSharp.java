@@ -44,7 +44,6 @@ import model.mutantoperator.qsharp.RotYZ;
 import model.mutantoperator.qsharp.RotZX;
 import model.mutantoperator.qsharp.RotZY;
 import model.mutantoperator.qsharp.ZeroOne;
-import model.testing.QStateTesting;
 import model.testing.Testing;
 
 /**
@@ -151,12 +150,14 @@ public class QSharp extends Language {
 	}
 
 	@Override
-	protected String isQStateTest(Testing test) {
-		if (test instanceof QStateTesting) {
+	protected String isQStateTest(Testing testing) {
+		switch(testing.getTestingType()) {
+		case QSTATETESTING:
 			return ", QStateTest=True";
-		} else {
+		case PROBABILISTICTESTING:
 			return "";
 		}
+		return "";
 	}
 
 	@Override
@@ -203,5 +204,10 @@ public class QSharp extends Language {
 	protected void deleteFiles(ArrayList<ArrayList<TestFile>> files) {
 		super.deleteFiles(files);
 		deleteFile(path + File.separator + qStateQsharpTempFile);
+	}
+
+	@Override
+	protected String getRunMethod() {
+		return "run_qsharp_shots";
 	}
 }

@@ -23,6 +23,9 @@ import exception.NullStringException;
 import exception.ShotsException;
 import exception.TimeLimitException;
 import javafx.util.Pair;
+import model.configuration.Option;
+import model.configuration.Properties;
+import model.language.ELanguage;
 import model.language.Language;
 import model.language.QSharp;
 import model.language.Qiskit;
@@ -93,9 +96,31 @@ public class Model implements Observable<Observer> {
 	 * @param language
 	 */
 	public Model() {
+		Properties.setPythonPath(findPython());
 		confidence = 1.0;
 		selectedLanguage = languages[0];
 		mutantList = new ArrayList<Mutant>();
+	}
+
+	/**
+	 * 
+	 * @return Python path.
+	 */
+	private String findPython() {
+		if (System.getProperty("os.name").startsWith("Windows")) {
+			for (File root : File.listRoots()) {
+				File folder = new File(root.toString());
+				File[] listOfFiles = folder.listFiles();
+				for (File f : listOfFiles) {
+					if (f.isDirectory() && f.getName().toLowerCase().startsWith("python")) {
+						return root + f.getName() + File.separator + "python.exe";
+					}
+				}
+			}			
+			return "python";
+		} else {
+			return "python";
+		}
 	}
 
 	/**
@@ -157,8 +182,14 @@ public class Model implements Observable<Observer> {
 	 * 
 	 * @param qiskit Indicates whether qiskit is selected or not.
 	 */
-	public void updateMutantOperators(int language) {
-		selectedLanguage = languages[language];
+	public void updateMutantOperators(ELanguage language) {
+		switch(language) {
+		case QISKIT:
+			selectedLanguage = languages[0];
+			break;
+		case QSHARP:
+			selectedLanguage = languages[1];
+		}
 		updatePath(path);
 		notifyLanguageChange();
 	}
@@ -395,42 +426,52 @@ public class Model implements Observable<Observer> {
 	 */
 	public void run(ArrayList<Mutant> mutantList, ArrayList<String> testSuit, Testing test, String file, String method,
 			double timeLimit) {
-		try {
-			if (timeLimit <= 0) {
-				throw new TimeLimitException();
-			}
-			if (test.getShots() <= 0) {
-				throw new ShotsException();
-			}
-			if (testSuit.size() == 0) {
-				throw new EmptyListException("Test list");
-			}
-			if (file == null || file.equals("")) {
-				throw new NullStringException("file");
-			}
-			if (method == null || file.equals("")) {
-				throw new NullStringException("method");
-			}
-			if (mutantList.size() == 0) {
-				throw new EmptyListException("Mutant list");
-			}
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					observer.startedRun(true);
+					if (timeLimit <= 0) {
+						throw new TimeLimitException();
+					}
+					if (test.getShots() <= 0) {
+						throw new ShotsException();
+					}
+					if (testSuit.size() == 0) {
+						throw new EmptyListException("Test list");
+					}
+					if (file == null || file.equals("")) {
+						throw new NullStringException("file");
+					}
+					if (method == null || file.equals("")) {
+						throw new NullStringException("method");
+					}
+					if (mutantList.size() == 0) {
+						throw new EmptyListException("Mutant list");
+					}
 
-			NotifyListener listener = new NotifyListener() {
-				@Override
-				public void notify(String msg) {
-					observer.notifyTestCaseRunner(msg);
+					NotifyListener listener = new NotifyListener() {
+						@Override
+						public void notify(String msg) {
+							observer.notifyTestCaseRunner(msg);
+						}
+					};
+					results = selectedLanguage.run(mutantList, testSuit, test, method, timeLimit, listener,
+							Properties.getPythonPath());
+
+					observer.notifyResults(results);
+					getKills();
+					observer.notifyTestCaseRunner("Completed\n");
+				} catch (TimeLimitException | ShotsException | EmptyListException | NullStringException e) {
+					notifyError(e);
+				} catch (Exception e) {
+					notifyError("Unknown error occurred during execution. Please, check your test and try again.");
+				} finally {
+					observer.startedRun(false);
 				}
-			};
-			results = selectedLanguage.run(mutantList, testSuit, test, method, timeLimit, listener);
+			}
+		};
+		thread.start();
 
-			observer.notifyResults(results);
-			getKills();
-			observer.notifyTestCaseRunner("Completed\n");
-		} catch (TimeLimitException | ShotsException | EmptyListException | NullStringException e) {
-			notifyError(e);
-		} catch (Exception e) {
-			notifyError("Unknown error occurred during execution. Please, check your test and try again.");
-		}
 	}
 
 	/**
@@ -451,6 +492,10 @@ public class Model implements Observable<Observer> {
 
 	public void updateTesting(Testing testing, int shots, String methodName) {
 		observer.updateInputExample(selectedLanguage.getInputExample(testing, shots, methodName));		
+	}
+
+	public Option[] getOptions() {
+		return Properties.getOptions();
 	}
 
 }

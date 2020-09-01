@@ -23,12 +23,15 @@ import javax.swing.JOptionPane;
 import control.Controller;
 import model.Observable;
 import model.Observer;
+import model.configuration.Option;
+import model.language.ELanguage;
 import model.mutant.Mutant;
 import model.mutantoperator.MutantOperator;
 import model.testing.Testing;
 import model.testresult.TestResult;
 import view.MenuBar.LanguageListener;
 import view.MenuBar.ResetListener;
+import view.MenuBar.OptionsListener;
 import view.mutantgeneratorview.Files.NewPathListener;
 import view.mutantgeneratorview.MutantsGenerator.NewGenerateListener;
 import view.testcaserunnerview.RunOptions.FileComboListener;
@@ -87,7 +90,7 @@ public class UI extends JFrame implements Observer {
 		menuBar = new MenuBar(new LanguageListener() {
 
 			@Override
-			public void languageChosen(int language) {
+			public void languageChosen(ELanguage language) {
 				c.updateLanguage(language);
 			}
 
@@ -97,7 +100,12 @@ public class UI extends JFrame implements Observer {
 			public void reset() {
 				c.reset();
 			}
-
+		}, new OptionsListener() {
+			
+			@Override
+			public Option[] getOptions() {
+				return c.getOptions();
+			}
 		});
 		setJMenuBar(menuBar);
 
@@ -140,9 +148,7 @@ public class UI extends JFrame implements Observer {
 			@Override
 			public void runTests(ArrayList<Mutant> selectedMutants, String fileName, String methodName,
 					Testing testType, int shots, ArrayList<String> testFileName, double timeLimit) {
-				tabbedPane.startedRun(true);
 				c.runTests(selectedMutants, fileName, methodName, testType, shots, testFileName, timeLimit);
-				tabbedPane.startedRun(false);
 			}
 
 		}, new ConfidenceListener() {
@@ -212,6 +218,11 @@ public class UI extends JFrame implements Observer {
 	@Override
 	public void updateInputExample(String inputExample) {
 		tabbedPane.updateInputText(inputExample);
+	}
+	
+	@Override
+	public void startedRun(boolean b) {
+		tabbedPane.startedRun(b);
 	}
 
 }

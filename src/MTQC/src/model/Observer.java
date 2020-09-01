@@ -100,5 +100,11 @@ public interface Observer {
 	 * @param inputExample
 	 */
 	public void updateInputExample(String inputExample);
+	
+	/**
+	 * Notify when run starts and ends.
+	 * @param b True if starts, false if ends.
+	 */
+	public void startedRun(boolean b);
 
 }

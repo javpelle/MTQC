@@ -10,11 +10,7 @@
 
 package model.language;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 import model.files.TestFile;
 import model.mutantoperator.MutantOperator;
@@ -71,7 +67,6 @@ import model.mutantoperator.qiskit.ZTGate;
 import model.mutantoperator.qiskit.ZXGate;
 import model.mutantoperator.qiskit.ZYGate;
 import model.testing.Testing;
-import model.testresult.TestResult;
 
 /**
  * Language concrete class, which overrides some methods in order to implement
@@ -127,61 +122,6 @@ public class Qiskit extends Language {
 	@Override
 	protected String generateImportLanguage() {
 		return "from qiskit import *" + System.lineSeparator();
-	}
-	
-	@Override
-	protected void generatePythonScript(ArrayList<ArrayList<TestFile>> files, Testing test, double timeLimit) {
-		String script = generateImportLanguage();
-		script += System.lineSeparator();
-		script += "from tools import run_qiskit_shots, save_data" + System.lineSeparator();
-		for (ArrayList<TestFile> list : files) {
-			for (TestFile t : list) {
-				script += "import " + t.getFileName() + System.lineSeparator();
-			}
-		}
-		script += System.lineSeparator();
-		script += "if __name__ == '__main__':" + System.lineSeparator();
-		script += "\td = {}" + System.lineSeparator();
-		for (ArrayList<TestFile> list : files) {
-			for (TestFile t : list) {
-				script += "\trun_qiskit_shots(" + getMethodCall(t.getFileName()) + ", " + String.valueOf(timeLimit) + ", "
-						+ String.valueOf(test.getShots()) + ", " + "d)" + System.lineSeparator();
-			}
-		}
-		script += "\tsave_data(d)" + System.lineSeparator();
-		writeFile(path + File.separator + main, script);
-	}
-	
-	@Override
-	protected ArrayList<ArrayList<TestResult>> runMain(ArrayList<ArrayList<TestFile>> files, Testing test) {
-		try {
-			Process p = Runtime.getRuntime().exec(pythonCall(path, main));
-			p.waitFor();
-			return generateResults(files, test);
-		} catch (IOException e) {
-
-		} catch (InterruptedException e) {
-			
-		}
-		return null;
-	}
-
-	private ArrayList<ArrayList<TestResult>> generateResults(ArrayList<ArrayList<TestFile>> files, Testing test) {
-		ArrayList<ArrayList<TestResult>> results = new ArrayList<ArrayList<TestResult>>();
-		for (ArrayList<TestFile> list : files) {
-			ArrayList<TestResult> aux = new ArrayList<TestResult>();
-			for (int t = 0; t < list.size(); t++) {
-				TestResult tr = test.newTestResult(list.get(t).getMutantName(), list.get(t).getIdTest());
-				for (int i = 0; i < test.getShots(); i++) {
-					//tr.setResult(readLine(in));
-				}
-				tr.make();
-				aux.add(tr);
-			}
-			results.add(aux);
-			listener.notify("Test number " + (list.get(0).getIdTest() + 1) + " finished\n");
-		}
-		return results;
 	}
 
 	@Override
@@ -241,6 +181,11 @@ public class Qiskit extends Language {
 	@Override
 	public String getEndMethodToken() {
 		return ":";
+	}
+
+	@Override
+	protected String getRunMethod() {
+		return "run_qiskit_shots";
 	}
 
 }

@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import model.Model;
+import model.configuration.Option;
+import model.language.ELanguage;
 import model.mutant.Mutant;
 import model.mutantoperator.MutantOperator;
 import model.testing.Testing;
@@ -74,7 +76,7 @@ public class Controller {
 	 * 
 	 * @param qiskit Boolean used to check which language is selected
 	 */
-	public void updateLanguage(int language) {
+	public void updateLanguage(ELanguage language) {
 		model.updateMutantOperators(language);
 	}
 
@@ -192,6 +194,10 @@ public class Controller {
 
 	public void updateTesting(Testing testing, int shots, String methodName) {
 		model.updateTesting(testing, shots, methodName);		
+	}
+
+	public Option[] getOptions() {
+		return model.getOptions();
 	}
 
 }

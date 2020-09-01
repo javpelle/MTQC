@@ -21,26 +21,15 @@ public class JSON {
 		}
 	}
 
-	public HashMap<String, Integer> getCounts(int key) {
+	public HashMap<String, Long> getCounts(int key) {
 		String aux = results.get(key);
-		HashMap<String, Integer> counts = new HashMap<String, Integer>();
+		HashMap<String, Long> counts = new HashMap<String, Long>();
 		String[] parts = aux.split(",");
 		for (String s : parts) {
 			String[] parts2 = s.split(":");
-			counts.put(parts2[0].substring(1, parts2[0].length() - 1), Integer.valueOf(parts2[1]));
+			counts.put(parts2[0].substring(1, parts2[0].length() - 1), Long.valueOf(parts2[1]));
 		}
 		return counts;
-	}
-
-	public HashMap<Integer, Double> getStatevector(int key) {
-		String aux = results.get(key);
-		HashMap<Integer, Double> statevector = new HashMap<Integer, Double>();
-		String[] parts = aux.split(",");
-		for (String s : parts) {
-			String[] parts2 = s.split(":");
-			statevector.put(Integer.valueOf(parts2[0].substring(1, parts2[0].length() - 1)), Double.valueOf(parts2[1]));
-		}
-		return statevector;
 	}
 
 	private String readFile(String file) {
@@ -57,10 +46,6 @@ public class JSON {
 
 		}
 		return aux;
-	}
-
-	public static void main(String[] args) {
-		new JSON("python\\data.json");
 	}
 
 }

@@ -44,7 +44,7 @@ public class QStateTesting extends Testing {
 
 	@Override
 	public TestResult newTestResult(String mutantName, int idTest) {
-		return new QStateTestResult(mutantName, idTest);
+		return new QStateTestResult(mutantName, idTest, 1);
 	}
 
 	@Override
@@ -56,6 +56,11 @@ public class QStateTesting extends Testing {
 	public String getQiskitCounts() {
 		
 		return "return pow(abs(ex.result().get_statevector()), 2)";
+	}
+
+	@Override
+	public ETestingType getTestingType() {
+		return ETestingType.QSTATETESTING;
 	}
 
 }
