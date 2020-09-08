@@ -15,6 +15,7 @@ import java.io.File;
 import model.files.TestFile;
 import model.mutantoperator.MutantOperator;
 import model.mutantoperator.qiskit.CCXCSWAPGate;
+import model.mutantoperator.qiskit.CCXForgotten;
 import model.mutantoperator.qiskit.CHSWAPGate;
 import model.mutantoperator.qiskit.CHXGate;
 import model.mutantoperator.qiskit.CHYGate;
@@ -32,6 +33,7 @@ import model.mutantoperator.qiskit.CZHGate;
 import model.mutantoperator.qiskit.CZSWAPGate;
 import model.mutantoperator.qiskit.CZXGate;
 import model.mutantoperator.qiskit.CZYGate;
+import model.mutantoperator.qiskit.HForgotten;
 import model.mutantoperator.qiskit.HXGate;
 import model.mutantoperator.qiskit.HYGate;
 import model.mutantoperator.qiskit.HZGate;
@@ -85,10 +87,10 @@ public class Qiskit extends Language {
 	/**
 	 * Initializes all possible mutant operators for Qiskit language.
 	 */
-	private MutantOperator[] qiskitOperators = { new CCXCSWAPGate(), new CHSWAPGate(), new CHXGate(), new CHYGate(),
+	private MutantOperator[] qiskitOperators = { new CCXCSWAPGate(), new CCXForgotten(), new CHSWAPGate(), new CHXGate(), new CHYGate(),
 			new CHZGate(), new CSWAPCCXGate(), new CXHGate(), new CXSWAPGate(), new CXYGate(), new CXZGate(),
 			new CYHGate(), new CYSWAPGate(), new CYXGate(), new CYZGate(), new CZHGate(), new CZSWAPGate(),
-			new CZXGate(), new CZYGate(), new HXGate(), new HYGate(), new HZGate(), new RXYGate(), new RXZGate(),
+			new CZXGate(), new CZYGate(), new HForgotten(), new HXGate(), new HYGate(), new HZGate(), new RXYGate(), new RXZGate(),
 			new RYXGate(), new RYZGate(), new RZXGate(), new RZYGate(), new SdgSGate(), new SdgTGate(), new SdgZGate(),
 			new SSdgGate(), new STGate(), new SWAPCHGate(), new SWAPCXGate(), new SWAPCYGate(), new SWAPCZGate(),
 			new SZGate(), new TSdgGate(), new TSGate(), new TZGate(), new XHGate(), new XYGate(), new XZGate(),

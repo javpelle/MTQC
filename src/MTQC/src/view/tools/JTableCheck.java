@@ -10,7 +10,9 @@
 
 package view.tools;
 
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -27,6 +29,8 @@ public class JTableCheck<T> extends JTable {
 	private static final long serialVersionUID = 1L;
 
 	protected DefaultTableModel model;
+	
+	protected List<String> infoList;
 
 	/**
 	 * Construcor for the class.
@@ -36,8 +40,19 @@ public class JTableCheck<T> extends JTable {
 	public JTableCheck(Object[] columnNames) {
 		super(new DefaultTableModel(columnNames, 0));
 		model = (DefaultTableModel) getModel();
+		infoList = new ArrayList<String>();
 		getTableHeader().setReorderingAllowed(false);
 	}
+	
+	public String getToolTipText(MouseEvent e) {
+        try {
+        	return infoList.get(rowAtPoint(e.getPoint()));
+        } catch (Exception e1) {
+            //catch null pointer exception if mouse is over an empty line
+        }
+
+        return null;
+    }
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	/**
@@ -67,6 +82,17 @@ public class JTableCheck<T> extends JTable {
 	public void addRow(Object[] o) {
 		model.addRow(o);
 	}
+	
+	/**
+	 * Add a new row and info.
+	 * 
+	 * @param o List of objects for the new row.
+	 * @param info infoDescription
+	 */
+	public void addRow(Object[] o, String info) {
+		model.addRow(o);
+		infoList.add(info);
+	}
 
 	/**
 	 * Clears the table.
@@ -77,6 +103,7 @@ public class JTableCheck<T> extends JTable {
 				model.removeRow(i);
 			}
 		}
+		infoList = new ArrayList<String>();
 	}
 
 	/**

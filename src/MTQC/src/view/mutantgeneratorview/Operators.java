@@ -101,8 +101,8 @@ public class Operators extends JPanel {
 	 */
 	public void updateOperators(MutantOperator[] mutantOperatorList) {
 		table.clear();
-		for (int i = 0; i < mutantOperatorList.length; ++i) {
-			table.addRow(new Object[] { false, mutantOperatorList[i] });
+		for (MutantOperator m: mutantOperatorList) {
+			table.addRow(new Object[] { false, m }, m.getDescription());
 		}
 	}
 

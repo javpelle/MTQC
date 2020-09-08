@@ -44,9 +44,12 @@ public class ResultTable extends JPanel {
 		this.results = results;
 		cols = new TextField[3];
 		labels = new TextField[results.size()][3];
-		JPanel center = new JPanel();
-		center.setLayout(new GridLayout(results.size() + 1, 3));
-		centerPanel(center);
+//		JPanel center = new JPanel();
+//		center.setLayout(new GridLayout(results.size() + 1, 3));
+		//centerPanel(center);
+		
+		centerPanel(results.size() + 1);
+		
 		northPanel();
 	}
 
@@ -80,7 +83,7 @@ public class ResultTable extends JPanel {
 	 * Creates center panel.
 	 * 
 	 * @param center JPanel for the center of the view.
-	 */
+	 
 	private void centerPanel(JPanel center) {
 		cols[0] = new TextField("Name");
 		cols[1] = new TextField("Result");
@@ -97,8 +100,44 @@ public class ResultTable extends JPanel {
 			center.add(labels[i][2]);
 		}
 		add(new JScrollPane(center), BorderLayout.CENTER);
+	}*/
+
+	/**
+	 * Creates center panel.
+	 * 
+	 * @param center JPanel for the center of the view.
+	 */
+	private void centerPanel(int rows) {
+		cols[0] = new TextField("Name");
+		cols[1] = new TextField("Result");
+		cols[2] = new TextField("Killed");
+		JPanel center = new JPanel();
+		center.setLayout(new BorderLayout());
+		JPanel centerLeft = new JPanel();
+		centerLeft.setLayout(new GridLayout(rows, 1));
+		JPanel centerCenter = new JPanel();
+		centerCenter.setLayout(new GridLayout(rows, 1));
+		JPanel centerRight = new JPanel();
+		centerRight.setLayout(new GridLayout(rows, 1));
+		
+		centerLeft.add(cols[0]);
+		centerCenter.add(cols[1]);
+		centerRight.add(cols[2]);
+		for (int i = 0; i < results.size(); i++) {
+			labels[i][0] = new TextField(results.get(i).getName());
+			labels[i][1] = new TextField(results.get(i).toString());
+			labels[i][2] = new TextField("");
+			centerLeft.add(labels[i][0]);
+			centerCenter.add(labels[i][1]);
+			centerRight.add(labels[i][2]);
+		}
+		center.add(centerLeft, BorderLayout.WEST);
+		center.add(centerRight, BorderLayout.CENTER);
+		center.add(centerCenter, BorderLayout.EAST);
+		add(new JScrollPane(center), BorderLayout.CENTER);
 	}
 
+	
 	/**
 	 * Updates on the muntant kills.
 	 * 

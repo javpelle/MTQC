@@ -33,11 +33,9 @@ import model.testresult.TestResult;
  *
  */
 public abstract class Language {
-	
+
 	/**
-	 * Absolute path where Python is.
-	 * Windows: C:\Pythonxx\python.exe
-	 * Linux: python
+	 * Absolute path where Python is. Windows: C:\Pythonxx\python.exe Linux: python
 	 */
 	protected String pythonPath;
 
@@ -58,7 +56,7 @@ public abstract class Language {
 	 * Token used to distinguish between internal prints, and method return print.
 	 */
 	protected static final String keyEnd = "_mtqc_e";
-	
+
 	/**
 	 * File to store json results.
 	 */
@@ -77,7 +75,7 @@ public abstract class Language {
 	 * @param test       Type of test to be used.
 	 * @param method     Name of method to be tested.
 	 * @param timeLimit  Limit of time each test can run.
-	 * @param pythonPath 
+	 * @param pythonPath
 	 * @return All test results gathered during execution.
 	 */
 	public ArrayList<ArrayList<TestResult>> run(ArrayList<Mutant> mutantList, ArrayList<String> testSuit, Testing test,
@@ -135,11 +133,21 @@ public abstract class Language {
 			Thread thread = new Thread() {
 				public void run() {
 					BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					BufferedReader er = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 					try {
 						String msg = in.readLine();
 						while (msg != null) {
-							listener.notify(msg);
+							listener.notify(msg + System.lineSeparator());
 							msg = in.readLine();
+						}
+						msg = er.readLine();
+						if (msg != null) {
+							listener.notify(
+									"### Execution error ###" + System.lineSeparator() + System.lineSeparator());
+						}
+						while (msg != null) {
+							listener.notify(msg + System.lineSeparator());
+							msg = er.readLine();
 						}
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -147,11 +155,17 @@ public abstract class Language {
 				}
 			};
 			thread.start();
-			p.waitFor();
-			return generateResults(files, test);
+			int exitCode = p.waitFor();
+			thread.join();
+			if (exitCode == 0) {
+				return generateResults(files, test);
+			} else {
+				listener.notify(System.lineSeparator() + "### Execution error ###" + System.lineSeparator());
+				return null;
+			}
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
-		} 
+		}
 		return null;
 	}
 
@@ -176,14 +190,15 @@ public abstract class Language {
 		script += "\td = {}" + System.lineSeparator();
 		for (ArrayList<TestFile> list : files) {
 			for (TestFile t : list) {
-				script += "\t" + getRunMethod() + "(" + getMethodCall(t.getFileName()) + ", " + String.valueOf(timeLimit) + ", "
-						+ String.valueOf(test.getShots()) + ", d" + isQStateTest(test) +")" + System.lineSeparator();
+				script += "\t" + getRunMethod() + "(" + getMethodCall(t.getFileName()) + ", "
+						+ String.valueOf(timeLimit) + ", " + String.valueOf(test.getShots()) + ", d"
+						+ isQStateTest(test) + ")" + System.lineSeparator();
 			}
 		}
 		script += "\tsave_data(d)" + System.lineSeparator();
 		writeFile(path + File.separator + main, script);
 	}
-	
+
 	/**
 	 * Checks if we are running a Probability Test on QSharp.
 	 * 
@@ -318,8 +333,7 @@ public abstract class Language {
 	 * @param test  Type of test.
 	 * @return List of all TestFiles for this execution.
 	 */
-	protected ArrayList<ArrayList<TestResult>> generateResults(ArrayList<ArrayList<TestFile>> files,
-			Testing test) {
+	protected ArrayList<ArrayList<TestResult>> generateResults(ArrayList<ArrayList<TestFile>> files, Testing test) {
 		ArrayList<ArrayList<TestResult>> results = new ArrayList<ArrayList<TestResult>>();
 		JSON json = new JSON("python\\data.json");
 		int count = 0;
@@ -411,9 +425,10 @@ public abstract class Language {
 	 * @return End method Token language String.
 	 */
 	public abstract String getEndMethodToken();
-	
+
 	/**
 	 * "run_qiskit_shots" or "run_qsharp_shots".
+	 * 
 	 * @return "run_qiskit_shots" or "run_qsharp_shots".
 	 */
 	protected abstract String getRunMethod();

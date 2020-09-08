@@ -262,7 +262,10 @@ public class Model implements Observable<Observer> {
 		File originalFile = new File(completeFilePath);
 		String file = "";
 		BufferedReader reader = null;
+		// Key: line, Value: totalOffset
 		ArrayList<Pair<Integer, Integer>> lineOffset = new ArrayList<Pair<Integer, Integer>>();
+		// Key: totalOffset initLine, Value: totalOffset endLine
+		ArrayList<Pair<Integer, Integer>> lineInfo = new ArrayList<Pair<Integer, Integer>>();		
 		int lineCount = 1;
 		int totalOffset = 0;
 
@@ -278,21 +281,29 @@ public class Model implements Observable<Observer> {
 						lineOffset.add(new Pair<Integer, Integer>(lineCount, totalOffset + offset - 1));
 					}
 				}
-
+				
 				file = file + line.substring(1) + System.lineSeparator();
+				lineInfo.add(new Pair<Integer, Integer>(totalOffset, file.length()));
 				totalOffset = file.length();
 				lineCount++;
 				line = reader.readLine();
 			}
 
-			StringBuilder fileBuilder = new StringBuilder(file);
+			StringBuilder fileBuilder = null;
 			File saveFile;
 			BufferedWriter writer = null;
-			for (int i = 0; i < lineOffset.size(); i++) {
-
-				fileBuilder.delete(lineOffset.get(i).getValue(), lineOffset.get(i).getValue() + searchWord.length());
-				fileBuilder.insert(lineOffset.get(i).getValue(), replaceWord);
-				String name = "_" + Integer.toString(i) + "_" + mutantOperator.getName() + "_" + filePath;
+			int numFile = 0;
+			for (Pair<Integer, Integer> p: lineOffset) {
+				fileBuilder = new StringBuilder(file);
+				
+				if (replaceWord == null) { // remove line
+					fileBuilder.delete(lineInfo.get(p.getKey() - 1).getKey(), lineInfo.get(p.getKey() - 1).getValue());
+				} else {
+					fileBuilder.delete(p.getValue(), p.getValue() + searchWord.length());
+					fileBuilder.insert(p.getValue(), replaceWord);
+				}
+				
+				String name = "_" + Integer.toString(numFile++) + "_" + mutantOperator.getName() + "_" + filePath;
 				String filePathWrite = mutantPath + File.separator + name;
 				saveFile = new File(filePathWrite);
 				try {
@@ -302,12 +313,12 @@ public class Model implements Observable<Observer> {
 					if (writer != null)
 						writer.close();
 				}
-				auxList.add(new Mutant(name, path, filePath, mutantPath, name, lineOffset.get(i).getKey()));
+				auxList.add(new Mutant(name, path, filePath, mutantPath, name, p.getKey()));
 
 				// Devolvemos la estructura general de fileBuilder.
 
-				fileBuilder.delete(lineOffset.get(i).getValue(), lineOffset.get(i).getValue() + replaceWord.length());
-				fileBuilder.insert(lineOffset.get(i).getValue(), searchWord);
+//				fileBuilder.delete(lineOffset.get(i).getValue(), lineOffset.get(i).getValue() + replaceWord.length());
+//				fileBuilder.insert(lineOffset.get(i).getValue(), searchWord);
 			}
 		} catch (
 
@@ -457,10 +468,11 @@ public class Model implements Observable<Observer> {
 					};
 					results = selectedLanguage.run(mutantList, testSuit, test, method, timeLimit, listener,
 							Properties.getPythonPath());
-
-					observer.notifyResults(results);
-					getKills();
-					observer.notifyTestCaseRunner("Completed\n");
+					if (results != null) {
+						observer.notifyResults(results);
+						getKills();
+						observer.notifyTestCaseRunner("Completed\n");
+					}
 				} catch (TimeLimitException | ShotsException | EmptyListException | NullStringException e) {
 					notifyError(e);
 				} catch (Exception e) {
