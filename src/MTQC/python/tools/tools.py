@@ -10,7 +10,7 @@ from tools.func_timeout import func_timeout, FunctionTimedOut
 import json
 
 def run_qsharp_shots (function, timeout, shots, d, QStateTest = False):
-    aux = {}
+    aux_d = {}
     for i in range(shots):
         try:
             if QStateTest:
@@ -23,26 +23,30 @@ def run_qsharp_shots (function, timeout, shots, d, QStateTest = False):
                     # We dont want the first chars from dump machine from each line. Ket chars cause problems regarding UTF8 encoding.
                     # We just need amplitud from each state.
                     aux_list = aux_list + x[x.find('[') : x.find(']') + 1]
-                print(keyStart, aux_list)
-                print(keyEnd)
+                aux_list = aux_list[1:-1]
+                aux_list = aux_list.replace(",",".")
+                aux_list = aux_list.split("][")
+                aux_list = list(map(float, aux_list))
+                for i in range(len(aux_list)):
+                    aux_d[i] = int(round(aux_list[i], 2) * 100)
                 filetemp.close()
             else:
                 doitReturnValue = func_timeout(timeout, function)
-                if doitReturnValue in aux:
-                    aux[doitReturnValue] = aux[doitReturnValue] + 1
+                if doitReturnValue in aux_d:
+                    aux_d[doitReturnValue] = aux_d[doitReturnValue] + 1
                 else:
-                    aux[doitReturnValue] = 1
+                    aux_d[doitReturnValue] = 1
         except FunctionTimedOut:
             if "TimeLimit" in aux:
-                aux["TimeLimit"] = aux["TimeLimit"] + 1
+                aux_d["-1"] = aux_d["-1"] + 1
             else:
-                aux["TimeLimit"] = 1
+                aux_d["-1"] = 1
         except Exception as e:
             if str(e) in aux:
-                aux[str(e)] = aux[str(e)] + 1
+                aux_d["-2"] = aux_d["-2"] + 1
             else:
-                aux[str(e)] = 1
-    d[len(d)] = aux
+                aux_d["-2"] = 1
+    d[len(d)] = aux_d
 			
 def run_qiskit_shots(function, timeout, shots, d):
 	try:
