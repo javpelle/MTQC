@@ -20,7 +20,7 @@ import java.util.HashMap;
  *
  */
 public class ProbabilistTestResult extends TestResult {
-	
+
 	/**
 	 * Constructor for the class.
 	 * 
@@ -30,18 +30,22 @@ public class ProbabilistTestResult extends TestResult {
 	public ProbabilistTestResult(String mutantName, int idTest, int shots) {
 		super(mutantName, idTest, shots);
 	}
-	
+
 	@Override
 	public String getName() {
 		return mutantName + "_" + Integer.toString(idTest);
 	}
-	
+
 	/**
 	 * Overrides the Object toString method.
 	 */
 	public String toString() {
 		String ret = "";
 		for (HashMap.Entry<String, Long> entry : map.entrySet()) {
+			if (entry.getValue().longValue() == -1l || entry.getValue().longValue() == -2l) {
+				errorDetected = true;
+				return entry.getValue().longValue() == -1l ? "Timeout" : "Execution error";
+			}
 			ret += "(" + entry.getKey() + ", " + entry.getValue() + ", "
 					+ String.valueOf((double) Math.round(entry.getValue() * 1000.0 / shots) / 10.0) + "%)";
 		}
@@ -50,10 +54,15 @@ public class ProbabilistTestResult extends TestResult {
 
 	@Override
 	public boolean getKill(TestResult original, double confidence) {
+		if (errorDetected)
+			return true;
 		long max = 0;
 		HashMap<String, Long> originalMap = original.getResult();
 
 		for (HashMap.Entry<String, Long> entry : map.entrySet()) {
+			if (entry.getValue().longValue() == -1l || entry.getValue().longValue() == -2l) {
+				return true;
+			}
 			if (!originalMap.containsKey(entry.getKey())) {
 				max = Math.max(max, entry.getValue());
 			} else {

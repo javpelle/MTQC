@@ -56,9 +56,9 @@ def run_qiskit_shots(function, timeout, shots, d):
 				aux[i] = int(round(doitReturnValue[i], 2) * 100)
 			d[len(d)] = aux
 	except FunctionTimedOut:
-		d[len(d)] = "TimeLimit"
+		d[len(d)] = {"-1":-1}
 	except Exception as e:
-		d[len(d)] = e
+		d[len(d)] = {"-2":-2}
 	print("Test number ", len(d), " completed.")
 	
 def save_data(d):

@@ -107,15 +107,20 @@ public class Model implements Observable<Observer> {
 	 * @return Python path.
 	 */
 	private String findPython() {
+		String aux_anaconda = "ProgramData" + File.separator + "Anaconda3" + File.separator + "python.exe";
 		if (System.getProperty("os.name").startsWith("Windows")) {
 			for (File root : File.listRoots()) {
 				File folder = new File(root.toString());
 				File[] listOfFiles = folder.listFiles();
-				for (File f : listOfFiles) {
-					if (f.isDirectory() && f.getName().toLowerCase().startsWith("python")) {
-						return root + f.getName() + File.separator + "python.exe";
+				if (listOfFiles != null) {
+					for (File f : listOfFiles) {
+						if (f.isDirectory() && f.getName().toLowerCase().startsWith("python")) {
+							return root + f.getName() + File.separator + "python.exe";
+						}
 					}
 				}
+				if (new File(root + File.separator + aux_anaconda).exists()) 
+					return root + File.separator + aux_anaconda;
 			}			
 			return "python";
 		} else {
@@ -476,7 +481,8 @@ public class Model implements Observable<Observer> {
 				} catch (TimeLimitException | ShotsException | EmptyListException | NullStringException e) {
 					notifyError(e);
 				} catch (Exception e) {
-					notifyError("Unknown error occurred during execution. Please, check your test and try again.");
+					e.printStackTrace();
+					notifyError("Unknown error occurred during execution. Please, check your test and try again. ERROR: " + e.getMessage());
 				} finally {
 					observer.startedRun(false);
 				}

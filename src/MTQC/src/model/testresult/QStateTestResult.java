@@ -42,6 +42,10 @@ public class QStateTestResult extends TestResult {
 	public String toString() {
 		String ret = "";
 		for (HashMap.Entry<String, Long> entry : map.entrySet()) {
+			if (entry.getValue().longValue() == -1l || entry.getValue().longValue() == -2l) {
+				errorDetected = true;
+				return entry.getValue().longValue() == -1l? "Timeout" : "Execution error";
+			}
 			if (entry.getValue() != 0) {
 				ret = " |" + entry.getKey() + "> = " + (double) entry.getValue() + "%," + ret;
 			}
@@ -55,7 +59,7 @@ public class QStateTestResult extends TestResult {
 
 	@Override
 	public boolean getKill(TestResult original, double confidence) {
-		return !map.equals(original.getResult());
+		return !map.equals(original.getResult()) || errorDetected;
 	}
 
 }

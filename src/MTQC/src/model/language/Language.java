@@ -87,7 +87,7 @@ public abstract class Language {
 		generatePythonScript(files, test, timeLimit);
 		listener.notify("Files generated. Running...\n");
 		ret = runMain(files, test);
-		deleteFiles(files);
+//		deleteFiles(files);
 		return ret;
 	}
 

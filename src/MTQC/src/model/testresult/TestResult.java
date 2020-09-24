@@ -27,6 +27,11 @@ public abstract class TestResult {
 	protected HashMap<String, Long> map;
 	
 	/**
+	 * True (mutant killed) if error detected.
+	 */
+	protected boolean errorDetected = false;
+	
+	/**
 	 * Name of the mutant the test was runned on.
 	 */
 	protected String mutantName;
